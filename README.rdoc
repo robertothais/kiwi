@@ -58,6 +58,22 @@ We can also define a catch all error handler in case none of them are defined in
     alert("You got some random error!")
   }
 
+== Concise and flexible parameter passing
+
+In a controller
+
+  $m.Post.create(this.params, this.publish)
+
+This will automatically serialize the parameters in the form of the calling view and send it over the wire. Currently this.params assumes that you have only one form per view.
+
+If you need to set a prefix to your parameters, simply set:
+
+  this.options.param_prefix = 'post'
+
+before calling the model.
+
+You can also set as the parameter argument a jQuery object representing a form, or a function that returns either jQuery-ized form, an arbitrary object you want to serialize, or a string.
+
 == Please fork if you like this
 
 Kiwi is good for this and other things. It can be improved in many ways, and I would love some help :)
