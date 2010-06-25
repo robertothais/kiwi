@@ -77,3 +77,8 @@ You can also set as the parameter argument a jQuery object representing a form, 
 == Please fork if you like this
 
 Kiwi is good for this and other things. It can be improved in many ways, and I would love some help :)
+
+== Documentation
+
+At http://rpbertp13.github.com/kiwi/
+
