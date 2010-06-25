@@ -1,0 +1,148 @@
+<html>
+  <head>
+    <title> Kiwi - docs - View: Updating </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <a href='index.html'>Index</a>
+    <h2> The View - Updating </h2>
+    <p>Once a model call fired by a controller returns, the controller will <a href='subscriptions.html'>publish</a> it if <i>this.publish</i> was specified as the success callback.</p>
+    <p>Publishing will result in the <i>update</i> method being called on all the subscribed views, unless otherwise declared on the options object in a <a href='view-listening.html'>listener</a> definition. In any case, this function has to be hand-coded into the view</p>
+    <pre>
+    $v('MyWidget', {
+      listeners: { 
+      ...
+      ...  
+      },
+      
+      update: function(action_name, request){
+        view_data = this.data = request.data
+      }
+    })
+    </pre>
+    <p>The action that is called on publish, whether it is the <i>update</i> or a custom method, will get two parameters: the name of the calling controller action, and the request object. Note that the data in the request data will be exactly what was returned by the server. If you need post-processing before the view layer, then use the <i>this.continue_to</i> callback in your controller.</p>
+    
+    <h3>A note on <i>this</i></h3>
+    <p>As you can see, we're setting <i>this.data</i> in the <i>update</i> action above. The referent of <i>this</i> in a view is not to be confused with its referent in a controller. While in the controller <i>this</i> refers to the <i>request object</i>, in a view it refers to the instance of the view itself. The request is accesible in view methods as an argument.</p>
+    <p>Any <i>in-view function</i> that is called by listener, will get passed the request object as its first and only argument, e.g.:
+    <pre>
+      $v('MyWidget', {
+        listeners:{
+          ...
+          'a mouseover' : 'highlight',          
+          'a mouseout': 'remove_highlight'
+        },
+        
+        highlight: function(request){
+          request.target.css({color: 'red'})
+        },
+        
+        remove_highlight: function(request){
+          request.target.css({color: 'blue'})
+        }
+      })
+    </pre>
+    
+    <h3>Rendering</h3>
+    <p>While the <i>update</i> or equivalent function is perfectly able to update the DOM with any data passed to it, it is advisable to have it only update an internal property of the view (in the example above, <i>this.data</i>) and have a separate function or functions that will do the rendering. These would be called by the <i>update</i> function whenever it is appropriate:</p>
+    
+    <pre>
+      $v('MyWidget', {
+        listeners: { 
+        ...
+        ...  
+        },
+
+        update: function(action_name, request){
+          view_data = this.data = request.data
+          this.render_new()
+        },
+        
+        render_new: function(){
+          new_node = this["node-element"].render_with(this.data)
+          new_node.appendTo(this.node)
+        }
+      })
+    </pre>
+  <p>Notice the method <i>render_with</i> being called inside <i>render_new</i>. This is a helper method that takes advantage fo Kiwi's conventions on <i>markup</i>.
+    
+  <h3>Markup</h3>
+  <p>Very often you'll see javascript like this</p>
+  <pre>
+    function render_new_messy(data){
+      $("&lt;div class ='a-user'&gt;")
+        .append($("&lt;div&gt;")
+          .append($("&lt;a class = 'url' href=data.url&gt;"))
+            .append($("&lt;span class = 'name'&gt;").text(data.name))
+          .append($("&lt;img class = 'thumbnail' &gt;").attr("src", data.thumbnail))
+        .append("&lt;div class = 'bio'"&gt;).text(data.bio))
+        .appendTo($("#user-list"))
+    }
+  </pre>
+  <p>Kiwi doesn't like this. Kiwi thinks that the best kind of language to define DOM structure is a <i>markup</i> language, and that the best place to do it is your templates, not your javascript.</p>
+  <p>This is why Kiwi uses <i>partials</i>. 
+  <h3>Partials</h3>
+  <p>Those coming from Rails know what a partial is. It is a reusable template, intended to be reused within and accross views. Kiwi's views, however, are not full html pages as Rails views. They are javascript objects that have control over determined portion of the DOM. This portion of the DOM will be more often than not defined as a partial (Rails or equivalent). Correspondingly, a partial in Kiwi is a reusable template within the portion of the DOM that our view is controlling. From a Rails perspective, a partial within a partial. For the sake of clarity we will refer to a Rails type partial as a 'backend partial'.
+    
+    <p>Very often we want to insert data retrieved with ajax into a predefined DOM structure. A way of doing this is shown above, in our function <i>render_new_messy</i>, this is, we construct the node on the fly with javascript. But this tends to result in unreadable code and painful debugging: the structure of our partial is not transparent in the javascript.</p>
+  
+  <h3>Rendering - Redux</h3>
+  <p>Kiwi works best if you define the structure of your Kiwi partials in your backend partial. When you initialize a view with a node, Kiwi will look at the next node in the same level as the one you provided, and check if it has the class "partials"
+    <pre>
+      &lt;div id='main-node'&gt;
+        ...
+        ...
+      &lt;/div&gt;
+      &lt;div class='partials'&gt;        
+        &lt;div class='a-user'&gt;
+          &lt;div&gt;
+            &lt;a class = 'url' href ='#'&gt;
+              &lt;span class = 'name'&gt;&lt;/span&gt;
+            &lt;/a&gt;
+            &lt;img class = 'thumbnail' /&gt;
+          &lt;div class = 'bio'"&gt;&lt;/div&gt;          
+        &lt;/div&gt;         
+        ...
+      &lt;/div&gt;        
+    </pre>
+    <p>If it does then it will look for all its children that have a class name. For each one that does, a property named after that class will be added to the view. Accessing this property will return a jQuery object cloned out of the partial. So in this case:</p>
+    <pre>
+      this['a-user']
+    </pre>
+    <p>Will return a jQuery object with the structure defined in the markup above</p>
+    <p>Additionally, it will also add the method <i>render_with</i> to this jQuery object. This method takes an object containing the data you want to render inside your partial. Data is matched to nodes as follows</p>
+    <ul>
+      <li>Any node except of the IMG and A kind with class X will get the jQuery <i>text</i>(Y) method called on it, where Y is the value corresponding to the key X in the argument of <i>render_with</i></li>
+      <li>If the node is an IMG with class X, then the <i>src</i> attribute will be set to Y.<li>
+      <li>If the node is an A with class X, then the <i>href</i> attribute will be set to Y.</li>
+    </ul>
+    <p>So if we have a data object</p>
+      <pre>
+        data = {
+          name: "Roberto",
+          url: "http://www.roberto.com",
+          thumbnail: "http://www.roberto.com/thumbnail.jpg",
+          bio: "Hello! I'm Roberto!"
+        }
+      </pre>
+      <p>and we call</p>
+      <pre>
+        node = this['a-user'].render_with(data)
+      </pre>
+      <p>inside a view function, we will end up with the following node:</p>
+      <pre>
+        &lt;div class='a-user'&gt;
+          &lt;div&gt;
+            &lt;a class = 'url' href ='http://www.roberto.com'&gt
+              &lt;span class = 'name'&gt;Roberto
+            &lt;a&gt;
+            &lt;img class = 'thumbnail' src='http://www.roberto.com/thumbnail.jpg'/&gt;
+          &lt;div class = 'bio'"&gt"Hello! I'm Roberto!"/div&gt;          
+        &lt;/div&gt;
+      </pre>
+      <p>which we can append wherever it corresponds.</p>
+    <h4><a href='index.html'>Back</a>
+  </body>
+</html>

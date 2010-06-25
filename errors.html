@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title> Kiwi - docs - Errors </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <a href='index.html'>Index</a>
+    <h2> Errors </h2>
+    
+    <p>Error handling in Kiwi is done by means of http status codes. The concept is simple, if you want your server to indicate an error to the javascript client, use a status code. No need to contaminate your successful data with indicators that the request went through as desired. Or having your success handlers check for error flags. Status code 200 OK should mean exactly that, everything is OK, go through as expected.</p>
+    <p>To deal when things don't go as expected, Kiwi uses a tier-based approach.</p> Kiwi first looks for specific error handlers assigned to possible status codes in the request that is being processed. If it doesn't find them, it looks for a global error handler defined for the specific request. If it doesn't find <i>that</i>, then it triggers the <i>global error handler.</i></p>
+    
+    <p>An Kiwi <i>error handler object</i> is a javascript object with http status codes (or 'all') as keys, and functions as values. For example:</p>
+    <pre>
+        my_errors = {
+          404: function(status_code, message, xhr){
+            ..... //do something
+          },
+          302: function(status_code, message, xhr){
+            ..... //do something else
+          }
+        }
+        
+        my_one_error = {
+          all: function(status_code, message, xhr){ 
+            ..... //do something
+          }
+        }
+    </pre>
+    <p>As you can see the error functions get passed three arguments. The first is the status code of the http response. The second is a message object, which is either the server response body JSON eval'd (so make sure the server replies with JSON on errors), or, if the server did not respond properly, a simple string describing the error (either a connection error, a timeout, or a parse error with the response). The last argument is the XMLHttpRequest object itself.</p>
+    
+    <p>To use these error objects I need to plug them into a listener definition as explained in the first section on <a href='view-listening.html'>the view</a>.</p>
+    <p>If an http request returns fired by that listener returns one of the specified error codes, the matching function will be executed. If my error object has the 'all' key, then that function will be executed for <i>all</i> codes that are not in the 200 range, 304 or 1223 (these are success codes as defined by jQuery). </p>
+    
+    <p>Finally if no error code in our object matches the server response, or none was specified, the <i>global error handler</i> will be summoned. By default the global error handler is a stub, it does nothing. You can change this like this:</p>
+    
+    <pre>   $k.options.global_error_handler = {...} </pre>
+    
+    <p>The global error handler object is similar to the error handler object for individual requests. You can define responses to status codes by using the key-value mechanism. If you want a function to be executed whenever there are no status code matches in the request error handler object <i>or</i> in the global error handler object, then assing it to the key 'base' like so:</p>
+    
+    <pre>   $k.options.global_error_handler.base = function(){
+      // do something for all unmatched errors!
+    }
+    </pre>
+    <h4><a href='index.html'>Back</a>
+  </body>
+</html>
+        
+        
+      

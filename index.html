@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title> Kiwi - docs </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <p>Kiwi is a lightweight javascript framework designed to help you organize your javascript code. It uses the tried and tested MVC architectural pattern to separate code that is doing different things. </p>
+    <p>To keep itself and your javascript light, Kiwi tries to speak http as much as it can (especially when handling <a href='errors.html'>errors</a>), and assumes you have a RESTful server resources. It also provides a few shortcuts for common ajax tasks.</p>
+    <p>There are two central concepts in Kiwi: the <a href='request.html'>request</a> and <a href='subscriptions.html'>subscriptions</a>. The request is the object that persists from a triggering event in the DOM (e.g. a click) up to the http call and usually down to the DOM again, if we want to render something. Subscriptions are the way we get different areas of the DOM to respond to certain logical actions of your application. In other words, we use subscriptions to ensure that data presented in different parts of the DOM is consistent.</p>
+    <p>Learning how to use Kiwi means simply learning how to control the request from its inception in the DOM and back. In terms of the components of MVC, the request takes the following trip:</p>
+    <pre>     View --> Controller --> Model --> Controller --> View </pre>
+    <p>The two view steps require individual coding, while the both roles of the controller are achieved with the same code. In light of this progression, we've split the rest of the documentation into the following sections:</p>
+    <ol>
+      <h2 style='float:left'><li><a href="view-listening.html">View - Listening</h2></a><span style='position:relative;top:27px;left:10px'>(Plus an introduction to the view)</span></li>
+      <h2 style='clear:left'><li><a href="controller.html">Controller</h2></a></li>
+      <h2><li><a href="model.html">Model</h2></a></li>
+      <h2><li<a href="view-updating.html">View - Updating</h2></a></li>
+    </ol>
+    <p>Going through these sections sequentially is recommended for an initial ramp-up of the framework.</p>
+    <p>There are also sections on:</p>
+      <ul>
+        <li><a href='request.html'>The Request</a></li>
+        <li><a href='subscriptions.html'>Subscriptions</a></li>
+        <li><a href='errors.html'>Errors</a></li>
+  </body>
+<html>
+    
+    

@@ -1,0 +1,76 @@
+<html>
+  <head>
+    <title> Kiwi - docs - Controller </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <a href='index.html'>Index</a>
+    <h2> The Controller </h2>s
+    Once a request has been initiated by one of the views listeners it is the controller's job to fire the appropriate http request (by means of a <a href='model.html'>model</a> call) and decide what happens to the data that is returned. The controller will also collect from the DOM any data that needs to get sent to the server.
+    <h3> Defining a Controller</h3>
+    Defining a controller is very similar to defining a view. We use the $c function which takes as arguments the name of the controller and an object with action names as keys and functions as values. For example:</p>
+      <pre>   $c('MyController', {
+          'an_action': function(){
+            $m.MyModel.find('all', {limit: 10}, this.continue_to('follow_up_action'))
+          },
+          
+          'follow_up_action' : function(){
+            var models = this.data
+            $m.MyModel.find(data[0].id).destroy(this.publish)
+          },
+          
+          'another_action': function(){
+            $m.MyModel.find(this.model_id, this.publish)
+          },
+          
+          'create_action': function(){
+            var data = {
+              name: $('#name, this.view.node).text()
+              bio: $('#bio', this.view.node).text()
+            }
+            $m.MyModel.create(data, this.publish)
+          }
+      })
+      </pre>
+    <p>As you can see controller actions tend to be thin wrappers around <a href='model.html'>model</a> calls. It is also important to note that there should only be one model call per individual action, otherwise unpredictable behavior will ensue.</p>
+    <p>The syntax of model calls is covered in the <a href='model.html'>model section</a> The two main ideas proper to the controller layer are <i>success callback flow</i> and <i>DOM data gathering</i>.</p>
+    
+    <h3>Success Callback Flow</h3>
+    Model calls made from a controller should get passed a success callback that is either:
+      <pre>   this.publish</pre>
+    <p>or</p>
+      <pre>   this.continue_to([next action name]) </pre>
+    <p>(Models can also receive arbitrary functions as callbacks, but this breaks the flow of the request. Try to avoid this)</p>
+    <p><i>this.publish</i> calls the specified functions on all views <a href='subscriptions.html'>subscribed</a> to the calling controller action and passes the data received from the model as an argument.</p>
+    <p><i>this.continue_to</i> calls the named action <i>in the current controller</i>. This will be used commonly when there is some post-processing that needs to be done on model data, or a second ajax call has to be fired in response to a previous one. The data yielded by the preceding action can be accessed with 
+      <pre>   this.data </pre>
+    </p>
+    <h3>A note on <i>this</i></h3>
+    <p>Within any controller action, the <i>this</i> keyword will reference the current <a href='request.html'>request object</a> that is being processed. Data needed across multiple layers of the application is and should be placed in it. For a full list of all its properties, click <a href='request.html'>here</a>.
+    <h3>DOM data gathering</h3>
+    <p>More often than not, whenever we make an ajax call we'll want to pass it some data as http parameters. Usually this data will be somewhere in the DOM, inside text fields, hidden attributes etc. To gather this data we simply use jQuery selectors and put it together into an object, as its being done above:</p>
+      <pre>
+        'create_action': function(){
+          var data = {
+            name: $('#name, this.view.node).text()
+            bio: $('#bio', this.view.node).text()
+          }
+          $m.MyModel.create(data, this.publish)
+        }
+      </pre>
+    <p>Controllers don't have a subset of the DOM ascribed to them, so their default scope is the entire document. To limit the namespace to the view that initiated the request, we use <b>this.view.node</b></p>
+    
+    <h4>Auto-id</h4>
+    <p>Whenever you place an attribute with a name that contains "_id" on a listened object, the value of that attribute will be accesible in the request object like so:</p>
+    <pre>
+    'another_action': function(){
+      $m.MyModel.find(this.model_id, this.publish)
+    },
+    </pre>
+    
+    
+    <h4><a href='index.html'>Back</a> or continue to the <a href ='model.html'>Model</a>
+  </body>
+</html>

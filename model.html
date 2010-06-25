@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <title> Kiwi - docs - Model </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <a href='index.html'>Index</a>
+    <h2> The Model </h2>
+    <p>The model takes charge of communicating with the server and representing server resources. Ideally you should define one model for each resource on the server.</p>
+    <h3>Defining a Model</h3>
+    <p>The model is the thinnest layer of the framework in terms of definitions. The only required information is a model name, and a corresponding resource name. Optionally, we can define associations if we want to query nested resources</p>
+    <pre>
+      $m('MyModel', {
+        resource: 'my-resource',
+        has: {'nested-resource':'NestedModel'}
+      })
+    </pre>
+    <p>As with defining views and controllers, the defining function (in this case $m) takes the name of your object followed by the object itself.</p>
+    <p>All the data in a model definition is used to make URLs. For example, the following find method</p>
+    <pre> $m.MyModel.find(60, success_callback)</pre>
+    <p>will trigger a GET request to</p>
+    <pre> [your base url]/my-resource/60</pre>
+    <p>Similarly, the following find </p>
+    <pre> $m.MyModel.find(60).nested-resource.find('all', success_callback)</pre>
+    <p>will GET</p>
+    <pre>[your base url]/my-resource/60/nested-resource</pre>
+    <p>Now it's time for the details on finding, and the rest of the model methods.</p>
+    
+    <h3>Finding - GET</h3>
+    <p>There are two kinds of things we can get from the server, a single resource representation, or a collection of them. Additionally, we can query either the model's primary resource, or any of its associated resources. This leaves us with four possible combinations.</p>
+    <ul>
+      <li><h4>Single Representation - Primary Resource</h4>
+          <pre>$m.MyModel.find(60, success_callback) --> /my-resource/60 </pre>
+          <p>Call the find method on the model with the <i>id</i> of the object as the first parameter, and the success callback as a second parameter. Note that if calling within a controller, this should ideally be <i>this.publish</i> or <i>this.continue_to</i>, but this is not required.</p></li> 
+          
+      <li><h4>Collection of Representations - Primary Resource</h4>
+        <pre>$m.MyModel.find('all', success_callback) --> /my-resource </pre>
+        <pre>$m.MyModel.find('all', {color: 'blue'}, success_callback) --> /my-resource?color=blue</pre>
+        <p>Call the find method with 'all' as the first argument. If we don't need to specify parameters, then the second argument should be the success callback. If we do, then pass an object with the parameters as the second argument, and the success callback as the third.</p></li>
+      <li><h4>Single Representation - Nested Resource</h4>
+        <pre>$m.MyModel.find(60).nested-resource.find(4, success_callback) --> /my-resource/60/nested-resource/4</pre>
+        <p>As you can see, the <i>find</i> method is being called twice in the above chain. This, however, does <i>not</i> trigger two server calls. The <i>find</i> method, when presented with no callbacks, will simply <i>bind</i> the model to the specified id to get it ready to fire a nested resource request. We can achieve <i>n</i> levels of nesting by calling the <i>find</i> method with no callback <i>n</i> number of times and call it once more with a callback provided.</p></li>
+      
+      <li><h4>Collection of Representations - Nested Resource</h4>
+      <pre>$m.MyModel.find(60).nested-resource.find('all', success_callback) --> /my-resource/60/nested-resource</pre>
+      <pre>$m.MyModel.find(60).nested-resource.find('all', {shape: 'round'} success_callback) --> /my-resource/60/nested-resource?shape=round</pre>
+      <p>The same logic as above applied to collections on a nested resource. After binding the model, simply call find 'all' to get the collection as shown.</p>
+          
+    </ul>
+    
+    <p> Note that all ids in our examples have been <i>numeric</i>. As of now Kiwi does not support resource identifiers that are not numbers.</p>
+  
+    <h3>Creating - POST</h3>
+    <p>To issue a POST request to the server in order to create a new resource representation, simply call the create method with an object containing the data you want to send as the first argument, and a success callback</p>
+    <pre>   $m.MyModel.create({color: 'red', size: 'large'}, success_callback)</pre>
+    <p>Note that this will not work if the model has been bound by a call to <i>find</i> earlier in the chain.</p>
+  
+    <h3>Updating - PUT </h3>
+    <p>As opposed to <i>create</i>, <i>update</i> has to be called on a bound model to work. Simply bind the model using <i>find</i> before calling <i>udpate</i> with the required parameters and success callback </p>
+    <pre>   $m.MyModel.find(60).update({color: 'yellow'}, success_callback)</pre>
+
+    <h3>Destroying - DELETE</h3>
+    <p>As with <i>update</i>, </i>destroy</i> must be called on a bound model. It takes no params, only a success callback</p>
+    <pre>   $m.MyModel.find(60).destroy(success_callback) </pre>
+    <h4><a href='index.html'>Back</a> or continue to the <a href ='view-updating.html'>View - Updating</a>
+  </body>
+</html>

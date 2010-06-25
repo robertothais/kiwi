@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title> Kiwi - docs - The Request </title>
+  </head>
+  <body>     
+    <img src='logo_small.gif' style='position:absolute;top:20px;right:10px'>
+    <h1> Kiwi Documentation (v. 0.1.0)</h1>
+    <hr>
+    <a href='index.html'>Index</a>
+    <h2> The Request </h2>
+    <p>The request carries data between layers of the application. The following are its properties:</p>
+    <ul>
+      <li><i>event</i> - the original DOM event that triggered the request, in jQuery form</li>
+      <li><i>view</i> - the view which triggered the request</li>
+      <li><i>options</i> - the options object that was used to initialize the request. It comes from the listener definition, and includes any defaults.</li>
+      <li><i>data</i> - data coming from the server gets placed here for communication between both chained controller actions and controller actions and subscribed views.</li>
+      <li><i>target</i> - the DOM element whose listener triggered the current request, as a jQuery object.</li>
+      <li>Plus any <i>"_id"</i> properties set by auto-id (check bottom of the section on the <a href='controller.html'>controller</a>)
+    </ul>
+    <h3> Stopping Execution </h3>
+    <p> If at any point before or between ajax calls you need to stop the normal flow of the request, simply throw "halt":</p>
+    <pre>   throw 'halt'</pre>
+    <p> You can do this in either views or controllers </p>
+    <h4><a href='index.html'>Back</a>
+  </body>
+</html>
